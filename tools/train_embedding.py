@@ -25,7 +25,7 @@ from utils.config import Config
 from utils.logger import logger, log
 from utils import mappings
 from tqdm import tqdm
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 def get_args():
@@ -261,20 +261,22 @@ def plot_roc(targets, outputs, cfg):
         fpr[i], tpr[i], _ = m.roc_curve(targets[:, i], outputs[:, i])
         roc_auc[i] = m.auc(fpr[i], tpr[i])
 
-    plt.figure(figsize=(12, 10))
-    for i in range(n_classes):
-        plt.subplot(2, 3, i+1)
-        lw = 2
-        plt.plot(fpr[i], tpr[i], color='darkorange',
-                 lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[i])
-        plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title('{}'.format(mappings.num_to_label[i]))
-        plt.legend(loc="lower right")
-    plt.savefig(cfg.workdir+"/auc_all_classes.png")
+    # plt.figure(figsize=(12, 10))
+    # for i in range(n_classes):
+    #     plt.subplot(2, 3, i+1)
+    #     lw = 2
+    #     plt.plot(fpr[i], tpr[i], color='darkorange',
+    #              lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[i])
+    #     plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    #     plt.xlim([0.0, 1.0])
+    #     plt.ylim([0.0, 1.05])
+    #     plt.xlabel('False Positive Rate')
+    #     plt.ylabel('True Positive Rate')
+    #     plt.title('{}'.format(mappings.num_to_label[i]))
+    #     plt.legend(loc="lower right")
+    # plt.savefig(cfg.workdir+"/auc_all_classes.png")
 
 if __name__ == "__main__":
+    # torch.backends.cudnn.enabled = True
+    # torch.backends.cudnn.benchmark = True
     main()
