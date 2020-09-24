@@ -6,8 +6,8 @@ import torch.nn.functional as F
 import pretrainedmodels
 from mmcv.cnn import constant_init, kaiming_init
 
-from .submodels.contextblock import ContextBlock
-from .submodels.asppblock import ASPPModule
+# from .submodels.contextblock import ContextBlock
+# from .submodels.asppblock import ASPPModule
 
 
 WINDOW = OrderedDict({
@@ -238,8 +238,11 @@ class Auto_Window_Optimization(nn.Module):
             ('pool3', nn.AdaptiveAvgPool2d(1)),
         ]))
 
+        # self.WL_predict = nn.Linear(512, 3)
+        # self.WW_predict = nn.Linear(512, 3)
+
         self.WL_predict = nn.Linear(512, 3)
-        self.WW_predict = nn.Linear(512, 3)
+        self.WW_predict = nn.Linear(515, 3)
 
         self.resnet_layer = nn.Sequential(*list(model.children())[:-2])
         self.bn = nn.BatchNorm2d(3)
@@ -257,7 +260,7 @@ class Auto_Window_Optimization(nn.Module):
                 constant_init(layer, 1)
 
         nn.init.normal_(self.WL_predict.weight, 0, 0.005)
-        nn.init.constant_(self.WL_predict.bias, -0)
+        nn.init.constant_(self.WL_predict.bias, 0)
         nn.init.normal_(self.WW_predict.weight, 0, 0.005)
         nn.init.constant_(self.WW_predict.bias, -2)
 
@@ -284,9 +287,18 @@ class Auto_Window_Optimization(nn.Module):
         # WW = self.WW_predict(x)
 
         #滑动平均
+        # x = x.view(x.shape[0], -1)
+        # WL = self.WL_predict(x)
+        # WW = self.WW_predict(x)
+        # WL, self.WL_moving = Statistic(self.training, WL, self.WL_gamma, self.WL_beta, self.WL_moving, 0.9)
+        # WW, self.WW_moving = Statistic(self.training, WW, self.WW_gamma, self.WW_beta, self.WW_moving, 0.9)
+        # weight = WL.view(3, 1, 1, 1)
+        # bias = WW.view(3)
+
+        #基于条件的
         x = x.view(x.shape[0], -1)
         WL = self.WL_predict(x)
-        WW = self.WW_predict(x)
+        WW = self.WW_predict(torch.cat([x, WL], dim=1))
         WL, self.WL_moving = Statistic(self.training, WL, self.WL_gamma, self.WL_beta, self.WL_moving, 0.9)
         WW, self.WW_moving = Statistic(self.training, WW, self.WW_gamma, self.WW_beta, self.WW_moving, 0.9)
         weight = WL.view(3, 1, 1, 1)
